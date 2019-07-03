@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace WhatsAppService
 
@@ -12,37 +15,82 @@ namespace WhatsAppService
       CREATED BY   -> JESUS EQUIHUA EQUIHUA
     ********************************************************************/
 {
+    /// <summary>
+    ///  Main class for CHAT-API Service
+    /// </summary>
     class APIWhatsApp
     {
+        private RequestBodySendMessage requestBodySendMessage = new RequestBodySendMessage();
+
         /*******************
          **** VARIABLES ****
          *******************/
 
-        /* API VARIABLES */
+        /* API CONST */
         const String URL = "https://api.chat-api.com/";
-        const String INSTANCE = "INSTANCENUMBER";
-        const String TOKEN = "TOKENNUMBER";
+        const String INSTANCE = "INSTANCE";
+        const String TOKEN = "TOKEN";
 
-        /* METHOD VARIABLES */
+        /* METHOD CONST */
         const String SEND_MESSAGE = "sendMessage";
         const String LIST_MESSAGES = "messages";
-      
+
         /// <summary>
-        /// Generate URL base with URL and instance (e.g. https://api.chat-api.com/instance13637/)
+        /// Generate URL base with URL and instance (e.g. https://api.chat-api.com/instance13633/)
         /// </summary>
         /// <returns></returns>
-        private string generateURLBase()
+        private String generateURLBase()
         {
             return string.Concat(URL, INSTANCE, "/");
         }
-        
+
         /// <summary>
         ///  Append token to URL string
         /// </summary>
         /// <returns></returns>
-        private string appendToken()
+        private String appendToken()
         {
             return string.Concat("?token=", TOKEN);
+        }
+
+        /// <summary>
+        ///     Execute a HTTP POST Request
+        /// </summary>
+        /// <param name="URL">URL to make request</param>
+        /// <param name="JSON">Params in JSON String</param>
+        /// <returns></returns>
+        private String HTPPRequest(String URL, String jsonString)
+        {
+            try
+            {
+                String outputString = String.Empty;
+                String URL_FORMATED = String.Format(URL);
+                HttpWebRequest requestObject = (HttpWebRequest)WebRequest.Create(URL_FORMATED);
+                requestObject.ContentType = "application/json; charset=utf-8";
+                requestObject.Method = "POST";
+
+                using (var streamWriter = new StreamWriter(requestObject.GetRequestStream()))
+                {
+                    streamWriter.Write(jsonString);
+                    streamWriter.Flush();
+                }
+
+                HttpWebResponse responseObject = null;
+                responseObject = (HttpWebResponse)requestObject.GetResponse();
+
+                using (Stream stream = responseObject.GetResponseStream())
+                {
+                    StreamReader streamReader = new StreamReader(stream);
+                    outputString = streamReader.ReadToEnd();
+                    streamReader.Close();
+                }
+
+                return outputString;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         /// <summary>
@@ -51,44 +99,63 @@ namespace WhatsAppService
         /// <returns>
         /// returns a valid URL string 
         /// </returns>
-        public string sendMessageURL()
+        public String generateSendMessageURL()
         {
             return string.Concat(generateURLBase(), SEND_MESSAGE, appendToken());
         }
-        
+
         /// <summary>
         /// Generate the URL necessary to list messages - CHAT-API returns 100 registers only.
         /// </summary>
         /// <returns></returns>
-        public string listMessagesURL()
+        public String generateListMessagesURL()
         {
             return string.Concat(generateURLBase(), LIST_MESSAGES, "/", appendToken());
         }
-        
+
         /// <summary>
         /// Generate the URL necessary to list messages from the message number
         /// </summary>
         /// <param name="LastNumber">From this number</param>
         /// <returns></returns>
-        public string listMessagesByLastNumberURL(int LastNumber) 
+        public String generateListMessagesByLastNumberURL(int LastNumber)
         {
             return string.Concat(generateURLBase(), LIST_MESSAGES, "/", appendToken(), "&lastMessageNumber=", LastNumber);
         }
-        
+
         /// <summary>
         /// Generate the URL necessary to list messages from message number and chat ID
         /// </summary>
         /// <param name="lastNumber">From this number</param>
         /// <param name="chatID">By this chat ID</param>
         /// <returns></returns>
-        public string listMessageWithLastNumberByChatID(int lastNumber, string chatID)
+        public String generateListMessageWithLastNumberByChatIDURL(int lastNumber, string chatID)
         {
             return string.Concat(generateURLBase(), LIST_MESSAGES, "/", appendToken(), "&lastMessageNumber=", lastNumber, "&chatId=", chatID);
         }
 
+        /// <summary>
+        ///  Send message and returns a ResponseBodyMessage object
+        /// </summary>
+        /// <param name="phoneNumber">Phone number to send message</param>
+        /// <param name="Message">Text you want to send</param>
+        /// <returns></returns>
+        public ResponseBodyMessage sendMessage(string phoneNumber, string Message)
+        {
+            try
+            {
+                requestBodySendMessage.setPhoneNumber(phoneNumber);
+                requestBodySendMessage.setMessage(Message);
+                String response = HTPPRequest(generateSendMessageURL(), requestBodySendMessage.getJSONString());
+                return JsonConvert.DeserializeObject<ResponseBodyMessage>(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
-
-    /* CLASS FOR BODY TO THE SEND MESSAGE REQUEST */
+    
     /// <summary>
     /// Body for sending messages.
     /// </summary>
@@ -103,7 +170,7 @@ namespace WhatsAppService
         ///  Empty constructor
         /// </summary>
         public RequestBodySendMessage() { }
-        
+
         /// <summary>
         /// Build the right body for sending messages.
         /// </summary>
@@ -130,6 +197,16 @@ namespace WhatsAppService
         }
 
         /// <summary>
+        ///     Returns a JSON String right to send message
+        /// </summary>
+        /// <returns></returns>
+        public String getJSONString()
+        {
+
+            return "{\"phone\":\""+phoneNumber+"\",\"body\":\""+Message+"\"}";
+        }
+
+        /// <summary>
         ///    Returns phone number.
         /// </summary>
         /// <returns></returns>
@@ -143,8 +220,8 @@ namespace WhatsAppService
         /// </summary>
         /// <param name="phoneNumber">Phone number</param>
         public void setPhoneNumber(string phoneNumber)
-        {          
-            this.phoneNumber =  formatNumber(phoneNumber);
+        {
+            this.phoneNumber = formatNumber(phoneNumber);
         }
 
         /// <summary>
@@ -178,6 +255,20 @@ namespace WhatsAppService
             }
             return phoneNumber;
         }
+    }
+
+    /// <summary>
+    ///  Body for message response
+    /// </summary>
+    class ResponseBodyMessage
+    {
+        public Boolean sent { get; set; }
+        public String id { get; set; }
+        public String message { get; set; }
+
+        public Boolean getSent() { return this.sent; }
+        public String getId() { return this.id; }
+        public String getMessage() { return this.message; }
     }
 
 }
