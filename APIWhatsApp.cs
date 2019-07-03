@@ -20,8 +20,8 @@ namespace WhatsAppService
 
         /* API VARIABLES */
         const String URL = "https://api.chat-api.com/";
-        const String INSTANCE = "instance13637";
-        const String TOKEN = "nnpq9kpqqoczvipx";
+        const String INSTANCE = "INSTANCENUMBER";
+        const String TOKEN = "TOKENNUMBER";
 
         /* METHOD VARIABLES */
         const String SEND_MESSAGE = "sendMessage";
