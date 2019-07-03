@@ -7,7 +7,7 @@ https://chat-api.com/en/?lang=ES
 This repository will be updated according my own needs.
 Feel free to pull your request to this repository.
 
-# Explanation
+## Explanation
 
 <ul>
 	<li>APIWhatsApp</li>
