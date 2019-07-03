@@ -7,6 +7,14 @@ https://chat-api.com/en/?lang=ES
 This repository will be updated according my own needs.
 Feel free to pull your request to this repository.
 
+# Explanation
+
+<ul>
+	<li>APIWhatsApp</li>
+	<li>RequestBodySendMessage</li>
+	<li>ResponseBodyMessage</li>
+</ul>
+
 # Conditions
 Follow the conventions.
 
