@@ -8,6 +8,13 @@ This repository will be updated according my own needs.
 Feel free to pull your request to this repository.
 
 # Explanation
+<strong>This class is under singleton pattern design</strong>
+<p>
+	This means you can use one instance in all your application only.
+	For getting instance in any block in your application you need to type the follow code:
+	<strong>APIWhatsApp WhatsAppApi = APIWhatsApp.getInstance();</strong>
+</p>
+
 <strong>APIWhatsApp</strong>
 <p>
 	This is the main class, it contains necessary methods to send messages to a WhatsApp number and methods to list all messages.
