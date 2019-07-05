@@ -11,6 +11,8 @@ namespace WhatsAppService
       YOU CAN ADD METHODS, VARIABLES AND ALL YOU NEED FOR THE RIGHT USE
       CONTINUING WITH CONVENTIONS.
 
+      THIS CLASS WAS CREATED USING SINGLETON PATTER DESIGN
+
       DATE CREATED -> JULY 7TH, 2019
       CREATED BY   -> JESUS EQUIHUA EQUIHUA
     ********************************************************************/
@@ -21,6 +23,7 @@ namespace WhatsAppService
     class APIWhatsApp
     {
         private RequestBodySendMessage requestBodySendMessage = new RequestBodySendMessage();
+        private static APIWhatsApp INSTANCE_API_WHATSAPP = null;
 
         /*******************
          **** VARIABLES ****
@@ -28,15 +31,31 @@ namespace WhatsAppService
 
         /* API CONST */
         const String URL = "https://api.chat-api.com/";
-        const String INSTANCE = "INSTANCE";
-        const String TOKEN = "TOKEN";
+        const String INSTANCE = "instance13637";
+        const String TOKEN = "nnpq9kpqqoczvipx";
 
         /* METHOD CONST */
         const String SEND_MESSAGE = "sendMessage";
         const String LIST_MESSAGES = "messages";
 
         /// <summary>
-        /// Generate URL base with URL and instance (e.g. https://api.chat-api.com/instance13633/)
+        ///     Private constructor for Singleton pattern design
+        /// </summary>
+        private APIWhatsApp() { }
+
+        /// <summary>
+        ///     Returns unique instance
+        /// </summary>
+        /// <returns></returns>
+        public static APIWhatsApp getInstance() {
+            if (INSTANCE_API_WHATSAPP == null)
+                INSTANCE_API_WHATSAPP = new APIWhatsApp();
+
+            return INSTANCE_API_WHATSAPP;
+        }
+
+        /// <summary>
+        /// Generate URL base with URL and instance (e.g. https://api.chat-api.com/instance13637/)
         /// </summary>
         /// <returns></returns>
         private String generateURLBase()
@@ -52,7 +71,7 @@ namespace WhatsAppService
         {
             return string.Concat("?token=", TOKEN);
         }
-
+                                                                             
         /// <summary>
         ///     Execute a HTTP POST Request
         /// </summary>
@@ -70,7 +89,7 @@ namespace WhatsAppService
                 requestObject.Method = "POST";
 
                 using (var streamWriter = new StreamWriter(requestObject.GetRequestStream()))
-                {
+                { 
                     streamWriter.Write(jsonString);
                     streamWriter.Flush();
                 }
@@ -129,7 +148,7 @@ namespace WhatsAppService
         /// <param name="lastNumber">From this number</param>
         /// <param name="chatID">By this chat ID</param>
         /// <returns></returns>
-        public String generateListMessageWithLastNumberByChatIDURL(int lastNumber, string chatID)
+        public String generateListMessageWithLastNumberByChatIDURL(int lastNumber, String chatID)
         {
             return string.Concat(generateURLBase(), LIST_MESSAGES, "/", appendToken(), "&lastMessageNumber=", lastNumber, "&chatId=", chatID);
         }
@@ -140,7 +159,7 @@ namespace WhatsAppService
         /// <param name="phoneNumber">Phone number to send message</param>
         /// <param name="Message">Text you want to send</param>
         /// <returns></returns>
-        public ResponseBodyMessage sendMessage(string phoneNumber, string Message)
+        public ResponseBodyMessage sendMessage(String phoneNumber, String Message)
         {
             try
             {
